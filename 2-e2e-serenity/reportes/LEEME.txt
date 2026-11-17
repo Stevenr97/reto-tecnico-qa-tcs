@@ -1,0 +1,1 @@
+Copiar aquí target/site/serenity y target/cucumber-reports después de ejecutar 'mvn clean verify'.

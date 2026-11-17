@@ -1,0 +1,5 @@
+[
+  { "caso": "password alfanumérico", "prefijo": "tcsqa_", "password": "Clave2026" },
+  { "caso": "password con caracteres especiales", "prefijo": "tcsqa_esp_", "password": "P@ss#2026!" },
+  { "caso": "password numérico", "prefijo": "tcsqa_num_", "password": "123456" }
+]

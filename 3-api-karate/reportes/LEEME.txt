@@ -1,0 +1,1 @@
+Copiar aquí target/karate-reports y target/cucumber-html-reports después de ejecutar 'mvn clean test'.

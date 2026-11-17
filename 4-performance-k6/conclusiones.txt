@@ -1,0 +1,39 @@
+=====================================================================
+ CONCLUSIONES - PERFORMANCE QA (EJERCICIO 1: CARGA DEL LOGIN CON k6)
+=====================================================================
+
+>>> RESULTADOS DE LA EJECUCIÓN (actualizar con reports/summary.txt de la última corrida)
+    - TPS alcanzado (http_reqs rate): ______ req/s   (objetivo >= 20)
+    - Tiempo de respuesta p(95) / p(99) / máx: ______ / ______ / ______  (límite 1,5 s)
+    - Tasa de error (http_req_failed): ______ %   (límite < 3 %)
+    - Checks OK: ______ %
+    - Resultado de thresholds: APROBADO / NO APROBADO
+
+DISEÑO DE LA PRUEBA
+- Se usó el ejecutor constant-arrival-rate (modelo abierto): k6 lanza exactamente 20
+  peticiones por segundo independientemente del tiempo de respuesta. Así se garantiza el
+  objetivo de 20 TPS; con un número fijo de VUs (modelo cerrado) el TPS bajaría si el
+  servicio se vuelve lento y no se mediría la carga pedida.
+- Los 5 usuarios del CSV se recorren de forma circular y se cargan una sola vez en memoria
+  (SharedArray), por lo que el consumo de recursos del generador es mínimo.
+- Los criterios de aceptación están codificados como thresholds: si no se cumplen, k6
+  termina con código de salida distinto de 0 (útil en un pipeline CI/CD).
+- Se mide el tiempo de respuesta en percentiles (p95/p99) y además se valida cada
+  petición individualmente con un check de <= 1,5 s, para ver cuántas lo superan.
+
+HALLAZGOS / CONSIDERACIONES
+- fakestoreapi.com es un servicio público de demostración, detrás de CDN; los resultados
+  dependen de la red del equipo que ejecuta y de la carga de otros usuarios, por lo que
+  pueden variar entre corridas. Para conclusiones de capacidad se debería probar en un
+  ambiente controlado.
+- Un servicio público puede aplicar limitación de tráfico (HTTP 429). Si aparecen 429,
+  se registran como error y deben analizarse aparte de los errores del servidor (5xx).
+- Todas las credenciales del CSV son válidas; se recomienda agregar un porcentaje de
+  credenciales inválidas para medir también el camino de error del login.
+
+RECOMENDACIONES
+- Ejecutar escalones de carga (20 -> 40 -> 60 TPS) para identificar el punto de quiebre.
+- Ejecutar una prueba de resistencia (soak) de mayor duración para detectar degradación
+  en el tiempo.
+- Correlacionar con métricas del servidor (CPU, memoria, conexiones) cuando se pruebe en
+  un ambiente propio.

@@ -1,0 +1,40 @@
+=====================================================================
+ CONCLUSIONES Y HALLAZGOS - EJERCICIO DE APIS (DEMOBLAZE)
+=====================================================================
+
+RESULTADO GENERAL
+- Se automatizaron los 4 casos solicitados (crear usuario, usuario existente, login
+  correcto, login incorrecto) más variantes de datos mediante Scenario Outline con
+  archivos JSON y CSV.
+- Las pruebas son independientes y repetibles: cada ejecución genera usernames únicos
+  y el login usa un usuario creado por la propia prueba (no depende de datos previos).
+
+HALLAZGOS SOBRE LOS SERVICIOS
+1. Códigos HTTP no semánticos: todas las respuestas devuelven 200, incluso los errores.
+   Lo esperado en una API REST sería, por ejemplo: 201 al crear el usuario, 409 cuando ya
+   existe y 401 con credenciales incorrectas. Esto obliga a validar el cuerpo de la
+   respuesta para saber si la operación falló.
+2. Riesgo de seguridad (enumeración de usuarios): el login responde mensajes distintos
+   para "Wrong password." y "User does not exist.", lo que permite a un atacante saber
+   qué usuarios existen. Se recomienda un mensaje genérico ("Usuario o contraseña
+   incorrectos").
+3. El password viaja codificado en Base64, que NO es cifrado: se decodifica trivialmente.
+   La protección real depende únicamente de HTTPS.
+4. No existe una política de contraseñas: se aceptan passwords débiles como "123456".
+5. Formatos de respuesta inconsistentes: el registro exitoso devuelve un cuerpo vacío,
+   el login exitoso devuelve un texto plano "Auth_token: <token>" y los errores devuelven
+   un JSON {"errorMessage": ...}. Lo ideal es un contrato JSON uniforme.
+6. Error gramatical en el mensaje: "This user already exist." (debería ser "already exists").
+
+CONSIDERACIONES TÉCNICAS
+- Variables y funciones comunes centralizadas en karate-config.js (baseUrl, generación
+  de usuarios únicos y codificación Base64) para no repetir lógica en los features.
+- Helper reutilizable (common/crear-usuario.feature) invocado con call / callonce para
+  preparar precondiciones sin duplicar pasos.
+- Se ejecuta con 1 hilo porque Demoblaze es un ambiente público compartido; el runner
+  admite paralelismo cambiando .parallel(n).
+
+MEJORAS PROPUESTAS
+- Agregar validación de esquema (contrato) de las respuestas y de tiempos de respuesta.
+- Casos de borde: campos vacíos, nulos, caracteres especiales en username, longitud máxima.
+- Ejecutar las pruebas en un pipeline CI y publicar el karate-report como artefacto.
