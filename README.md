@@ -7,7 +7,7 @@ Repositorio con la resolución de las pruebas técnicas.
 | `1-prueba-teorica/` | Prueba teórica (Excel con respuestas) | — |
 | `2-e2e-serenity/` | E2E: flujo de compra en demoblaze.com | Serenity BDD 4 + Screenplay + Cucumber 7, Java 17, Maven |
 | `3-api-karate/` | APIs: signup y login de api.demoblaze.com | Karate 1.5, Java 17, Maven |
-| `4-performance-k6/` | Performance: carga del login (20 TPS) + análisis de resultados (`ejercicio2-analisis/InformeResultados.doc`) | k6 v1.x |
+| `4-performance-k6/` | Performance: carga del login (20 TPS) + análisis de resultados (`ejercicio2-analisis/InformeResultados.doc`) | k6 (probado con v2.4.0) |
 
 Cada carpeta contiene:
 - `readme.txt` – instrucciones paso a paso y versiones
