@@ -14,6 +14,15 @@ Cada carpeta contiene:
 - `conclusiones.txt` – hallazgos, opiniones y consideraciones
 - `reportes/` o `reports/` – reportes de la última ejecución
 
+## Reportes en línea (GitHub Pages)
+| Reporte | Enlace |
+|---|---|
+| E2E – Serenity | https://stevenr97.github.io/reto-tecnico-qa-tcs/2-e2e-serenity/reportes/serenity/index.html |
+| E2E – Cucumber | https://stevenr97.github.io/reto-tecnico-qa-tcs/2-e2e-serenity/reportes/cucumber-reports/cucumber.html |
+| API – Karate | https://stevenr97.github.io/reto-tecnico-qa-tcs/3-api-karate/reportes/karate-reports/karate-summary.html |
+| API – Cucumber | https://stevenr97.github.io/reto-tecnico-qa-tcs/3-api-karate/reportes/cucumber-html-reports/overview-features.html |
+| Performance – k6 | https://stevenr97.github.io/reto-tecnico-qa-tcs/4-performance-k6/reports/summary.html |
+
 ## Ejecución rápida
 
 ```bash
