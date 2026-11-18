@@ -22,9 +22,12 @@ HALLAZGOS SOBRE LA APLICACIÓN
    el total aparece al final. Sin esperas explícitas las validaciones son inestables.
 4. Se reutiliza el mismo id HTML (tbodyid) en el catálogo, el detalle del producto y el
    carrito; los ids deberían ser únicos por página.
-5. El comprobante muestra la fecha de la compra: revisar en el reporte si el mes coincide
-   con la fecha real (en Demoblaze se ha reportado un desfase de un mes por usar el mes
-   en base 0 de JavaScript).
+5. DEFECTO - Fecha incorrecta en el comprobante: en una compra realizada el 18/11/2026,
+   el comprobante muestra "Date: 18/10/2026", es decir, el MES aparece con un mes de
+   atraso (el día y el año son correctos). La causa probable es el uso de getMonth() de
+   JavaScript, que numera los meses desde 0 (enero = 0), sin sumarle 1.
+   Impacto: el cliente recibe un comprobante con una fecha errónea (severidad media).
+   Evidencia: captura del último paso de cada compra en el reporte de Serenity.
 6. El carrito de un usuario anónimo se asocia a una cookie; cada escenario abre un
    navegador nuevo en modo incógnito para que los datos de un escenario no afecten a otro.
 

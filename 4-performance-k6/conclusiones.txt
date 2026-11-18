@@ -2,12 +2,34 @@
  CONCLUSIONES - PERFORMANCE QA (EJERCICIO 1: CARGA DEL LOGIN CON k6)
 =====================================================================
 
->>> RESULTADOS DE LA EJECUCIÓN (actualizar con reports/summary.txt de la última corrida)
-    - TPS alcanzado (http_reqs rate): ______ req/s   (objetivo >= 20)
-    - Tiempo de respuesta p(95) / p(99) / máx: ______ / ______ / ______  (límite 1,5 s)
-    - Tasa de error (http_req_failed): ______ %   (límite < 3 %)
-    - Checks OK: ______ %
-    - Resultado de thresholds: APROBADO / NO APROBADO
+RESULTADOS DE LA EJECUCIÓN (18/11/2026 - k6 v2.4.0 - 2 minutos a 20 TPS)
+------------------------------------------------------------------------
+| Criterio / métrica              | Objetivo        | Resultado            | Estado    |
+|---------------------------------|-----------------|----------------------|-----------|
+| Throughput (http_reqs)          | >= 20 TPS       | 19,95 req/s (2.401)  | CUMPLE    |
+| Tasa de error (http_req_failed) | < 3 %           | 0,00 % (0 de 2.401)  | CUMPLE    |
+| Tiempo de respuesta p(95)       | <= 1,5 s        | 439 ms               | CUMPLE    |
+| Tiempo de respuesta p(99)       | <= 1,5 s        | 571 ms               | CUMPLE    |
+| Tiempo de respuesta promedio    | -               | 379 ms (mediana 366) | -         |
+| Tiempo de respuesta máximo      | <= 1,5 s        | 1,80 s (1 petición)  | OBSERVAR  |
+| Checks OK                       | > 97 %          | 99,98 % (7.202 / 1)  | CUMPLE    |
+Resultado de los thresholds de k6: TODOS APROBADOS.
+
+CONCLUSIONES
+- El servicio de login soporta 20 TPS sostenidos durante 2 minutos sin errores
+  (0 de 2.401 peticiones fallidas) y con tiempos de respuesta muy por debajo del
+  límite: el 99 % de las peticiones respondió en menos de 571 ms.
+- Una sola petición (1 de 2.401 = 0,04 %) tardó 1,80 s y superó el límite de 1,5 s.
+  Si el criterio "máximo 1,5 s" se interpreta de forma estricta para cada petición,
+  hay 1 incumplimiento aislado; por eso se evalúan percentiles (p95/p99), que son la
+  práctica estándar porque un valor aislado puede deberse a la red o a un pico puntual.
+  Se recomienda repetir la prueba para ver si el valor atípico se repite.
+- Casi todo el tiempo de respuesta es espera del servidor (http_req_waiting ≈ 378 ms
+  de 379 ms); la conexión, el TLS, el envío y la recepción son despreciables, por lo que
+  el tiempo está dominado por el procesamiento del servidor y la latencia de red hasta él.
+- Bastaron entre 7 y 19 usuarios virtuales concurrentes para generar 20 TPS (con ~0,38 s
+  por petición, 20 TPS × 0,38 s ≈ 8 usuarios en promedio, según la Ley de Little), lo que
+  indica que la carga solicitada es baja para este servicio.
 
 DISEÑO DE LA PRUEBA
 - Se usó el ejecutor constant-arrival-rate (modelo abierto): k6 lanza exactamente 20

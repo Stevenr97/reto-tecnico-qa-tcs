@@ -32,8 +32,8 @@
 
 3. REQUISITOS (versiones usadas)
 --------------------------------
-  - Java JDK 17 o superior     (java -version)
-  - Apache Maven 3.9.x         (mvn -v)
+  - Java JDK 17 o superior     (probado con Temurin 21.0.13)   -> java -version
+  - Apache Maven 3.9 o superior (probado con 3.10.1)            -> mvn -v
   - Conexión a internet
   Dependencias (las descarga Maven):
   - Karate 1.5.0 (io.karatelabs:karate-junit5)

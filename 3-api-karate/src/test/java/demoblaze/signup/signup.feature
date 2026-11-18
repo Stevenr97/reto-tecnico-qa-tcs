@@ -31,3 +31,23 @@ Feature: Servicio de registro de usuarios (signup) - Demoblaze
     When method post
     Then status 200
     And match response == { errorMessage: 'This user already exist.' }
+
+  @campos_vacios @defecto
+  Scenario Outline: Intentar registrar un usuario con campos vacíos - <caso>
+    # En la web, la página bloquea los campos vacíos antes de enviar (validación del front-end).
+    # Aquí se verifica si el SERVIDOR también los rechaza cuando se llama a la API directamente.
+    * def username = conUsuario == 'si' ? usuarioUnico('tcsqa_vacio_') : ''
+    * def passwordCifrado = conPassword == 'si' ? aBase64('Clave2026') : ''
+    Given path 'signup'
+    And request { username: '#(username)', password: '#(passwordCifrado)' }
+    When method post
+    Then status 200
+    * karate.log('Respuesta del servidor para', '<caso>', ':', response)
+    * string respuesta = response
+    And match respuesta contains 'errorMessage'
+
+    Examples:
+      | caso           | conUsuario | conPassword |
+      | username vacío | no         | si          |
+      | password vacío | si         | no          |
+      | ambos vacíos   | no         | no          |

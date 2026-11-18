@@ -23,7 +23,7 @@
 
 3. REQUISITOS (versiones)
 -------------------------
-  - k6 v1.0.0 o superior (probado con k6 v1.x)   -> k6 version
+  - k6 v2.4.0 (probado; compatible con k6 v1.x)   -> k6 version
     Instalación:
       Windows : winget install k6 --source winget   (o choco install k6)
       macOS   : brew install k6
@@ -46,7 +46,7 @@
 
 5. REPORTES
 -----------
-  reports/summary.html   -> Reporte HTML (k6-reporter)
+  reports/summary.html   -> Reporte HTML (k6-reporter v3)
   reports/summary.txt    -> Resumen de consola en texto
   reports/summary.json   -> Datos completos en JSON
   reports/dashboard.html -> Dashboard web de k6 (si se usó el paso 4)

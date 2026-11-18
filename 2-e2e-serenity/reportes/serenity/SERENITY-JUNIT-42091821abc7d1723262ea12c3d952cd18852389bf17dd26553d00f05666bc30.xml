@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><testsuite errors="0" failures="0" name="Flujo de compra en la tienda online Demoblaze" skipped="0" tests="4" time="33.04" timestamp="2026-11-18 11:49:09"><testcase name="Compra exitosa de dos productos - &lt;descripcion&gt;"/><testcase name="No se permite finalizar la compra sin nombre ni tarjeta de crédito"/></testsuite>

@@ -28,7 +28,7 @@ class DemoblazeApiTest {
     @Test
     void ejecutarPruebasApiDemoblaze() {
         Results results = Runner.path("classpath:demoblaze")
-                .tags("~@ignore")
+                .tags("~@ignore", "~@defecto")
                 .outputCucumberJson(true)
                 .parallel(1);
         generarReporteCucumber(results.getReportDir());

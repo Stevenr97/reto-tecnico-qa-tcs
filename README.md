@@ -30,8 +30,23 @@ cd 4-performance-k6 && k6 run login-load-test.js
 # Reporte: reports/summary.html
 ```
 
-## Requisitos
-- Java JDK 17+
-- Maven 3.9+
-- Google Chrome
-- k6 v1.0+
+## Requisitos (versiones con las que se probó)
+- Java JDK 17+ (probado con Temurin 21.0.13)
+- Maven 3.9+ (probado con 3.10.1)
+- Google Chrome (versión estable actual)
+- k6 (probado con v2.4.0)
+- Windows 11
+
+## Resultados de la última ejecución
+| Ejercicio | Resultado |
+|---|---|
+| E2E Serenity | 4/4 escenarios OK |
+| API Karate | 7/7 escenarios OK (+3 escenarios `@defecto` que documentan defectos de la API) |
+| Performance k6 | 20 TPS, 0 % errores, p(95) 439 ms: todos los thresholds aprobados |
+
+## Defectos encontrados
+- **API signup**: acepta usuarios con password vacío y responde 500 con username vacío (la validación solo existe en la web).
+- **Comprobante de compra**: muestra el mes con un mes de atraso (18/10/2026 en una compra del 18/11/2026).
+- **API login**: mensajes distintos para "usuario no existe" y "password incorrecto" (permite enumerar usuarios).
+
+Detalle en el `conclusiones.txt` de cada carpeta.

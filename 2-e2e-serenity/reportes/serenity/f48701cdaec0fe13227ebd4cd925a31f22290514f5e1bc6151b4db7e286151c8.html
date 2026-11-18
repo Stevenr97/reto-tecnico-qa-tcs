@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Serenity Reports</title>
+
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+<link rel="apple-touch-icon" sizes="57x57" href="apple-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="apple-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="apple-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="apple-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="apple-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="apple-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="apple-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="apple-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-icon-180x180.png">
+<link rel="icon" type="image/png" sizes="192x192"  href="android-icon-192x192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+<meta name="msapplication-TileColor" content="#ffffff">
+<meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+<meta name="theme-color" content="#ffffff">
+<link rel="stylesheet" href="bootstrap-icons/bootstrap-icons.css">
+<!-- JQuery -->
+<script type="text/javascript" src="scripts/jquery-1.11.1.min.js"></script><!-- Required Stylesheets -->
+<link href="bootstrap-treeview/dist/bootstrap-treeview.min.css" rel="stylesheet">
+
+<!-- Required Javascript -->
+<script src="bootstrap-treeview/dist/bootstrap-treeview.min.js"></script><!-- DataTables -->
+<link type="text/css" href="datatables/1.13.1/datatables.min.css" rel="stylesheet" />
+<script type="text/javascript" src="datatables/1.13.1/datatables.min.js"></script>
+<script type="text/javascript" src="datatables/1.13.1/time-elapsed-dhms.js"></script>
+
+<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<script src="bootstrap/js/bootstrap.min.js"></script>
+
+
+<script>
+    jQuery.fn.dataTable.ext.type.order['time-elapsed-dhms-pre'] = function(data) {
+
+        var matches = data.match(/^(\d+(?:\.\d+)?)\s*([a-z]+)/i);
+        var multipliers = {
+            ms: 1,
+            s: 1000,
+            m: 60000,
+            h: 3600000,
+            d: 86400000
+        };
+
+        if (matches) {
+            var multiplier = multipliers[matches[2].toLowerCase()];
+            return parseFloat(matches[1]) * multiplier;
+        } else {
+            return -1;
+        };
+    };
+</script>
+<link rel="stylesheet" href="css/core.css"/>
+<link rel="stylesheet" href="css/link.css"/>
+<link type="text/css" media="screen" href="css/screen.css" rel="Stylesheet"/>
+<!--CHART.JS-->
+<script src="chartjs/chart.js"></script>
+<script src="chartjs/chartjs-plugin-datalabels@2.0.0.min.js"></script>
+<script src="chartjs/patternomaly.min.js"></script>
+<script>
+    // Register the plugin to all charts:
+    Chart.register(ChartDataLabels);
+</script>
+<!-- JQuery-UI -->
+<link type="text/css" href="jqueryui/1.11.2-start/jquery-ui.min.css" rel="Stylesheet" />
+<script type="text/javascript" src="jqueryui/1.11.2-start/jquery-ui.min.js"></script><!-- DataTables -->
+<link type="text/css" href="datatables/1.13.1/datatables.min.css" rel="stylesheet" />
+<script type="text/javascript" src="datatables/1.13.1/datatables.min.js"></script>
+<script type="text/javascript" src="datatables/1.13.1/time-elapsed-dhms.js"></script>
+
+<link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<script src="bootstrap/js/bootstrap.min.js"></script>
+
+
+<script>
+    jQuery.fn.dataTable.ext.type.order['time-elapsed-dhms-pre'] = function(data) {
+
+        var matches = data.match(/^(\d+(?:\.\d+)?)\s*([a-z]+)/i);
+        var multipliers = {
+            ms: 1,
+            s: 1000,
+            m: 60000,
+            h: 3600000,
+            d: 86400000
+        };
+
+        if (matches) {
+            var multiplier = multipliers[matches[2].toLowerCase()];
+            return parseFloat(matches[1]) * multiplier;
+        } else {
+            return -1;
+        };
+    };
+</script>
+
+
+
+
+    <script class="code" type="text/javascript">$(document).ready(function () {
+
+            $("#scenario-results").DataTable({
+                "order": [[0, "asc",], [1, "asc",], [2, "asc",]],
+                "language": {
+                    searchPlaceholder: "Filter",
+                    search: ""
+                },
+                columnDefs: [
+                    {
+                        targets: 4,
+                        visible: false
+                    },
+                    {type: 'time-elapsed-dhms', targets: 6}
+                ]
+            })
+            $("#manual-scenario-results").DataTable({
+                "order": [[0, "asc",], [1, "asc",]],
+                "language": {
+                    searchPlaceholder: "Filter",
+                    search: ""
+                },
+                columnDefs: [
+                    {
+                        targets: 4,
+                        visible: false
+                    },
+                ]
+            })
+
+            // Results table
+            $('#test-results-table').DataTable({
+                "order": [[0, "asc",], [3, "asc",]],
+                "pageLength": 10,
+                "lengthMenu": [[10, 25, 50, 100, 200, -1], [10, 25, 50, 100, 200, "All"]]
+            });
+
+            $('#evidence-table').DataTable({
+                searching: false,
+                paging: false,
+                info: false
+            });
+
+            $(".feature-coverage-table").DataTable({
+                searching: true,
+                paging: false,
+                info: false,
+                language: {
+                    searchPlaceholder: "Filter",
+                    search: ""
+                },
+                columnDefs: [
+                    {
+                        targets: 2,
+                        visible: false
+                    },
+                ]
+            });
+
+            $(".feature-coverage-table-with-pagination").DataTable({
+                searching: true,
+                order: [[0, "asc",]],
+                pageLength: 10,
+                language: {
+                    searchPlaceholder: "Filter",
+                    search: ""
+                },
+                columnDefs: [
+                    {
+                        targets: 2,
+                        visible: false
+                    },
+                ]
+            });
+        });
+    </script>
+</head>
+
+<body class="results-page">
+<div id="topheader">
+    <div id="topbanner">
+        <div id="logo"><a href="index.html"><img src="images/serenity-logo.png" border="0"/></a></div>
+        <div id="projectname-banner" style="float:right">
+            <span class="projectname">
+                <span class="projecttitle">Reto TCS - E2E Flujo de compra Demoblaze</span>
+                <span class="projectsubtitle"></span>
+            </span>
+        </div>
+    </div>
+</div>
+
+<div class="middlecontent">
+
+
+    <div id="contenttop">
+        <div class="middlebg">
+        <span class="breadcrumbs"><a href="index.html">Home</a>
+                    > Tag 
+                > <span class="truncate-60">
+                Flujo Compra
+            </span>
+        </span>
+        </div>
+        <div class="rightbg"></div>
+    </div>
+
+    <div class="clr"></div>
+    <!--/* starts second table*/-->
+<div>
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="active">
+            <a href="#"><i class="bi bi-journal-check"></i> Overall Test Results</a>
+        </li>
+        <li >
+            <a href="capabilities.html"><i class="bi bi-journal-text"></i> Requirements</a>
+        </li>
+        <li >
+            <a href="7ea0a5e2d679b9deeda9910ae4a9bcd3a281e0d908303a9e16e486103e98880c.html"><i class="bi bi-chat-text"></i> Capabilities</a>
+        </li>
+        <li >
+            <a href="576946480b52ad056d6f5bddf874399c83582ecf90963cc074a14c70580e7d9f.html"><i class="bi bi-chat-text"></i> Features</a>
+        </li>
+    </ul>
+    <span class="date-and-time"><a href="build-info.html"><i class="bi bi-info-circle"></i></a> Report generated 18-11-2026 11:49:47</span>
+    <br style="clear:left"/>
+</div>
+    <div class="clr"></div>
+    <div id="beforetable"></div>
+    <div id="results-dashboard">
+        <div class="middlb">
+            <div class="table">
+
+                <h2><i class='bi bi-tags'></i> Tag: Flujo Compra</h2>
+                <table class='overview'>
+                    <tr>
+                        <td width="375px" valign="top">
+                            <div class="test-count-summary">
+                                <div class="test-count-title">
+                                    4 tests
+
+                                     |
+                                        <a href="f48701cdaec0fe13227ebd4cd925a31f22290514f5e1bc6151b4db7e286151c8.csv" title="Download CSV"> <i class="bi bi-cloud-arrow-down"
+                                                                                        title="Download CSV"></i></a>
+
+
+                                </div>
+                            </div>
+
+                            <div>
+                                <ul class="nav nav-tabs">
+                                    <li class="active">
+                                        <a data-toggle="tab" href="#summary"><i class="bi bi-house-door"></i>
+                                            Summary</a>
+                                    </li>
+                                    <li>
+                                        <a data-toggle="tab" href="#tests"><i class="bi bi-speedometer"></i> Test
+                                            Results</a>
+                                    </li>
+                                </ul>
+
+
+                                <div class="card border">
+                                    <div class="tab-content" id="pills-tabContent">
+                                        <div id="summary" class="tab-pane fade in active">
+                                            <div class="container-fluid">
+                                                <div class="dashboard-charts row">
+                                                    <div class="col-lg-4 col-md-6 col-sm-9">
+                                                        <!-- PIE CHART -->
+                                                        <h4><i class="bi bi-pie-chart"></i> Overview</h4>
+                                                            <div class="chart-container">
+                                                                <canvas id="resultChart" height="200px"></canvas>
+                                                            </div>
+                                                    </div>
+                                                    <div class="col-lg-4 col-md-6 col-sm-9">
+                                                        <h4><i class="bi bi-check-square"></i> Test Outcomes</h4>
+                                                        <!-- Severity bar chart -->
+                                                        <div class="chart-container">
+                                                            <canvas id="severityChart" height="200px"></canvas>
+                                                        </div>
+                                                    </div>
+                                                        <div class="col-lg-4 col-md-6 col-sm-9">
+                                                            <h4><i class="bi bi-graph-up"></i> Test Performance</h4>
+
+                                                            <!-- Duration bar chart -->
+                                                            <div class="chart-container">
+                                                                <canvas id="durationChart" height="200px"></canvas>
+                                                            </div>
+                                                        </div>
+                                                </div>
+                                            </div>
+                                            <div class="container-fluid">
+                                                <div class="row">
+                                                        <div class="col-lg-8 col-md-8 col-sm-9">
+                                                            <!-- High level coverage bar chart -->
+                                                            <div class="chart-container">
+                                                                <h3><i class="bi bi-reception-3"></i> Functional
+                                                                    Coverage Overview</h3>
+                                                                <h4>Features</h4>
+                                                                <canvas id="coverageChart"></canvas>
+                                                            </div>
+                                                        </div>
+                                                    <div class="col-lg-4 col-md-4 col-sm-6">
+    <div>
+        <h3><i class="bi bi-speedometer2"></i> Key Statistics</h3>
+        <div>
+            <table class="table table-striped table-hover">
+                <tbody>
+                <tr scope="row">
+                    <td>
+                        <i class="bi bi-card-checklist"></i> Number of Scenarios
+                    </td>
+                    <td>2</td>
+                </tr>
+                <tr scope="row">
+                    <td>
+                        <i class="bi bi-caret-right"></i> Total Number of Test Cases
+                    </td>
+                    <td>4</td>
+                </tr>
+                <tr scope="row">
+                    <td>
+                        <i class="bi bi-flag-fill"></i> Tests Started
+                    </td>
+                    <td>Nov 18, 2026 11:49:09</td>
+                </tr>
+                <tr scope="row">
+                    <td>
+                        <i class="bi bi-stop-circle"></i> Tests
+                        Finished
+                    </td>
+                    <td>Nov 18, 2026 11:49:42</td>
+                </tr>
+                <tr scope="row">
+                    <td>
+                        <i class="bi bi-stopwatch"></i> Total
+                        Duration
+                    </td>
+                    <td>33s</td>
+                </tr>
+                <tr scope="row">
+                    <td>
+                        <i class="bi bi-trophy"></i> Fastest Test
+                    </td>
+                    <td>5s</td>
+                </tr>
+                <tr scope="row">
+                    <td>
+                        <i class="bi bi-skip-start"></i> Slowest
+                        Test
+                    </td>
+                    <td>10s</td>
+                </tr>
+                <tr scope="row">
+                    <td>
+                        <i class="bi bi-stopwatch"></i> Average
+                        Execution Time
+                    </td>
+                    <td>8s</td>
+                </tr>
+                <tr scope="row">
+                    <td>
+                        <i class="bi bi-stopwatch-fill"></i> Total
+                        Execution Time
+                    </td>
+                    <td>33s</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="container-fluid">
+                                                    <div class="row">
+                                                        <div class="col-sm-11">
+                                                            <h3>Functional Coverage Details</h3>
+
+
+                                                                    <h4>Features</h4>
+
+                                                                    <table class="table feature-coverage-table" id="Feature" style="width:100%">
+                                                                        <thead>
+                                                                        <tr>
+                                                                            <th>Feature</th>
+                                                                            <th style="width:1em;">Scenarios</th>
+                                                                            <th style="width:1em;">StepsText</th>
+                                                                            <th style="width:1em;">Test&nbsp;Cases</th>
+                                                                            <th style="width:1em;">%&nbsp;Pass</th>
+                                                                            <th style="width:1em;">Result</th>
+                                                                            <th>Coverage</th>
+                                                                        </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                                <tr>
+                                                                                    <td>
+                                                                                            <a href="ab82137448280ae6c660a277b78273eb47702d8bf14171e7ee890709b669b5ae.html"> Flujo de compra en la tienda online Demoblaze</a>
+                                                                                    </td>
+                                                                                    <td>2</td>
+                                                                                    <td>1: Compra exitosa de dos productos - dos celulares ({idCompra=1, descripcion=dos celulares, mensaje=Thank you for your purchase!})
+Dado que el cliente abre la tienda Demoblaze
+Cliente abre la tienda online Demoblaze
+Cliente opens the Tienda home page
+Cuando agrega al carrito los productos de la compra "1"
+Cliente agrega el producto Samsung galaxy s6 al carrito
+Cliente clicks on producto Samsung galaxy s6 del catálogo
+Cliente da clic en botón Add to cart y acepta la alerta del navegador
+Cliente clicks on opción Home del menú
+Cliente agrega el producto Nokia lumia 1520 al carrito
+Cliente clicks on producto Nokia lumia 1520 del catálogo
+Cliente da clic en botón Add to cart y acepta la alerta del navegador
+Cliente clicks on opción Home del menú
+Y visualiza el carrito de compras
+Cliente abre el carrito de compras
+Cliente clicks on opción Cart del menú
+Cliente espera a que el carrito cargue 2 producto(s) y el total
+Entonces el carrito muestra los productos agregados con el total correcto
+Then los productos listados en el carrito should be iterable with items ['Samsung galaxy s6', 'Nokia lumia 1520'] in any order
+Then el total mostrado en el carrito should be (1180)
+Cuando completa el formulario de compra con sus datos
+Cliente completa el formulario de compra con los datos de compra 1 (Samsung galaxy s6 + Nokia lumia 1520) de Juan Perez
+Cliente clicks on botón Place Order
+Cliente enters 'Juan Perez' into campo Name
+Cliente enters 'Ecuador' into campo Country
+Cliente enters 'Quito' into campo City
+Cliente enters '4111111111111111' into campo Credit card
+Cliente enters '11' into campo Month
+Cliente enters '2026' into campo Year
+Y finaliza la compra
+Cliente finaliza la compra con el botón Purchase
+Cliente clicks on botón Purchase
+Entonces visualiza el mensaje de confirmación "Thank you for your purchase!"
+Then el mensaje de confirmaci&oacute;n de la compra should be 'Thank you for your purchase!'
+Y el comprobante muestra el monto total, la tarjeta y el nombre del cliente
+Then el detalle del comprobante de compra should be (a string containing 'Amount: 1180 USD' and a string containing 'Card Number: 4111111111111111' and a string containing 'Name: Juan Perez')
+2: Compra exitosa de dos productos - dos laptops ({idCompra=2, descripcion=dos laptops, mensaje=Thank you for your purchase!})
+Dado que el cliente abre la tienda Demoblaze
+Cliente abre la tienda online Demoblaze
+Cliente opens the Tienda home page
+Cuando agrega al carrito los productos de la compra "2"
+Cliente agrega el producto Sony vaio i5 al carrito
+Cliente clicks on producto Sony vaio i5 del catálogo
+Cliente da clic en botón Add to cart y acepta la alerta del navegador
+Cliente clicks on opción Home del menú
+Cliente agrega el producto Sony vaio i7 al carrito
+Cliente clicks on producto Sony vaio i7 del catálogo
+Cliente da clic en botón Add to cart y acepta la alerta del navegador
+Cliente clicks on opción Home del menú
+Y visualiza el carrito de compras
+Cliente abre el carrito de compras
+Cliente clicks on opción Cart del menú
+Cliente espera a que el carrito cargue 2 producto(s) y el total
+Entonces el carrito muestra los productos agregados con el total correcto
+Then los productos listados en el carrito should be iterable with items ['Sony vaio i5', 'Sony vaio i7'] in any order
+Then el total mostrado en el carrito should be (1580)
+Cuando completa el formulario de compra con sus datos
+Cliente completa el formulario de compra con los datos de compra 2 (Sony vaio i5 + Sony vaio i7) de Maria Lopez
+Cliente clicks on botón Place Order
+Cliente enters 'Maria Lopez' into campo Name
+Cliente enters 'Ecuador' into campo Country
+Cliente enters 'Guayaquil' into campo City
+Cliente enters '5500000000000004' into campo Credit card
+Cliente enters '12' into campo Month
+Cliente enters '2027' into campo Year
+Y finaliza la compra
+Cliente finaliza la compra con el botón Purchase
+Cliente clicks on botón Purchase
+Entonces visualiza el mensaje de confirmación "Thank you for your purchase!"
+Then el mensaje de confirmaci&oacute;n de la compra should be 'Thank you for your purchase!'
+Y el comprobante muestra el monto total, la tarjeta y el nombre del cliente
+Then el detalle del comprobante de compra should be (a string containing 'Amount: 1580 USD' and a string containing 'Card Number: 5500000000000004' and a string containing 'Name: Maria Lopez')
+3: Compra exitosa de dos productos - dos celulares gama alta ({idCompra=3, descripcion=dos celulares gama alta, mensaje=Thank you for your purchase!})
+Dado que el cliente abre la tienda Demoblaze
+Cliente abre la tienda online Demoblaze
+Cliente opens the Tienda home page
+Cuando agrega al carrito los productos de la compra "3"
+Cliente agrega el producto Samsung galaxy s7 al carrito
+Cliente clicks on producto Samsung galaxy s7 del catálogo
+Cliente da clic en botón Add to cart y acepta la alerta del navegador
+Cliente clicks on opción Home del menú
+Cliente agrega el producto HTC One M9 al carrito
+Cliente clicks on producto HTC One M9 del catálogo
+Cliente da clic en botón Add to cart y acepta la alerta del navegador
+Cliente clicks on opción Home del menú
+Y visualiza el carrito de compras
+Cliente abre el carrito de compras
+Cliente clicks on opción Cart del menú
+Cliente espera a que el carrito cargue 2 producto(s) y el total
+Entonces el carrito muestra los productos agregados con el total correcto
+Then los productos listados en el carrito should be iterable with items ['Samsung galaxy s7', 'HTC One M9'] in any order
+Then el total mostrado en el carrito should be (1500)
+Cuando completa el formulario de compra con sus datos
+Cliente completa el formulario de compra con los datos de compra 3 (Samsung galaxy s7 + HTC One M9) de Carlos Andrade
+Cliente clicks on botón Place Order
+Cliente enters 'Carlos Andrade' into campo Name
+Cliente enters 'Colombia' into campo Country
+Cliente enters 'Bogota' into campo City
+Cliente enters '340000000000009' into campo Credit card
+Cliente enters '01' into campo Month
+Cliente enters '2028' into campo Year
+Y finaliza la compra
+Cliente finaliza la compra con el botón Purchase
+Cliente clicks on botón Purchase
+Entonces visualiza el mensaje de confirmación "Thank you for your purchase!"
+Then el mensaje de confirmaci&oacute;n de la compra should be 'Thank you for your purchase!'
+Y el comprobante muestra el monto total, la tarjeta y el nombre del cliente
+Then el detalle del comprobante de compra should be (a string containing 'Amount: 1500 USD' and a string containing 'Card Number: 340000000000009' and a string containing 'Name: Carlos Andrade')
+Dado que el cliente abre la tienda Demoblaze
+Cliente abre la tienda online Demoblaze
+Cliente opens the Tienda home page
+Cuando agrega al carrito el producto "Nexus 6"
+Cliente agrega el producto Nexus 6 al carrito
+Cliente clicks on producto Nexus 6 del catálogo
+Cliente da clic en botón Add to cart y acepta la alerta del navegador
+Cliente clicks on opción Home del menú
+Y visualiza el carrito de compras
+Cliente abre el carrito de compras
+Cliente clicks on opción Cart del menú
+Cliente espera a que el carrito cargue 1 producto(s) y el total
+Y intenta finalizar la compra sin llenar el formulario
+Cliente intenta finalizar la compra con el formulario vacío
+Cliente clicks on botón Place Order
+Cliente da clic en botón Purchase y acepta la alerta del navegador
+Entonces el sistema muestra la alerta "Please fill out Name and Creditcard."
+Then el texto de la &uacute;ltima alerta del navegador should be 'Please fill out Name and Creditcard.'
+</td>
+                                                                                    <td>4</td>
+                                                                                    <td>100%</td>
+                                                                                    <td>
+                                                                                            <a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <div class="progress">
+                                                                                                <div class="progress-bar"
+                                                                                                     role="progressbar"
+                                                                                                     style="width: 100%; background-color: #b0cf73"
+                                                                                                     aria-valuenow="4"
+                                                                                                     title="100% success"
+                                                                                                     aria-valuemin="0"
+                                                                                                     aria-valuemax="100">
+                                                                                                </div>
+                                                                                        </div>
+                                                                                    </td>
+                                                                                </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                        </div>
+                                                    </div>
+
+                                            </div>
+                                            <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-12">
+                <h3>Tags</h3>
+                    <div class="card">
+                        <div class="card-body">
+                            <div>
+                                    <a href="41f5205d6d58c0b87620866aba63cb6e3d1be42b6c5018f18cc7c680fcccb866.html">
+                                    <span class="tag-badge badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
+                                        <i class="bi bi-tag-fill"></i> E2e&nbsp;&nbsp;&nbsp;3
+                                    </span>
+                                    </a>
+                                    <a href="da86e1808664b147802c709193f2b54ca101641eca94719ba225175b350669d9.html">
+                                    <span class="tag-badge badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
+                                        <i class="bi bi-tag-fill"></i> Negativo&nbsp;&nbsp;&nbsp;1
+                                    </span>
+                                    </a>
+                                    <a href="5e560c8c80d650939c468783095d323d911fd254d2a1c0cf34674a3ee5badc73.html">
+                                    <span class="tag-badge badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
+                                        <i class="bi bi-tag-fill"></i> Compra Exitosa&nbsp;&nbsp;&nbsp;3
+                                    </span>
+                                    </a>
+                                    <a href="f48701cdaec0fe13227ebd4cd925a31f22290514f5e1bc6151b4db7e286151c8.html">
+                                    <span class="tag-badge badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
+                                        <i class="bi bi-tag-fill"></i> Flujo Compra&nbsp;&nbsp;&nbsp;4
+                                    </span>
+                                    </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                                <h5 class="card-title">Context</h5>
+                            <div>
+                                    <a href="59736924e81ea98f655ac8eba7cd96079d8d80131e0c4360daf32a724d0b38a0.html">
+                                    <span class="tag-badge badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
+                                        <i class="bi bi-tag-fill"></i> Chrome, Windows&nbsp;&nbsp;&nbsp;4
+                                    </span>
+                                    </a>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+                                            </div>
+                                        </div>
+                                        <div id="tests" class="tab-pane fade">
+                                            <div class="container-fluid">
+                                                <div class="row">
+                                                    <div class="col-sm-12">
+    <div>
+        <h3><i class="bi bi-speedometer2"></i> Key Statistics</h3>
+        <div>
+            <table class="table table-striped table-hover">
+                <tbody>
+                <tr scope="row">
+                    <td>
+                        <i class="bi bi-card-checklist"></i> Number of Scenarios
+                    </td>
+                    <td>2</td>
+                    <td>
+                        <i class="bi bi-stopwatch"></i> Total
+                        Duration
+                    </td>
+                    <td>33s</td>
+                </tr>
+                <tr scope="row">
+                    <td>
+                        <i class="bi bi-caret-right"></i> Total Number of Test Cases
+                    </td>
+                    <td>4</td>
+                    <td>
+                        <i class="bi bi-trophy"></i> Fastest Test
+                    </td>
+                    <td>5s</td>
+                </tr>
+                <tr scope="row">
+                    <td>
+                        <i class="bi bi-person"></i> Number of Manual Test Cases
+                    </td>
+                    <td>0</td>
+                    <td>
+                        <i class="bi bi-skip-start"></i> Slowest
+                        Test
+                    </td>
+                    <td>10s</td>
+                </tr>
+                <tr scope="row">
+                    <td>
+                        <i class="bi bi-flag-fill"></i> Tests Started
+                    </td>
+                    <td>Nov 18, 2026 11:49:09</td>
+                    <td>
+                        <i class="bi bi-stopwatch"></i> Average
+                        Execution Time
+                    </td>
+                    <td>8s</td>
+                </tr>
+                <tr scope="row">
+                    <td>
+                        <i class="bi bi-stop-circle"></i> Tests
+                        Finished
+                    </td>
+                    <td>Nov 18, 2026 11:49:42</td>
+                    <td>
+                        <i class="bi bi-stopwatch-fill"></i> Total
+                        Execution Time
+                    </td>
+                    <td>33s</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+                                                        <h3><i class="bi bi-gear"></i> Automated Scenarios</h3>
+
+                                                            <table class="scenario-result-table table" id="scenario-results" style="width:100%">
+                                                                <thead>
+                                                                <tr>
+                                                                    <th>feature</th>
+                                                                    <th class="test-name-column">Scenario</th>
+                                                                    <th>Context</th>
+                                                                    <th>Steps</th>
+                                                                    <th>StepsText</th>
+                                                                    <th>Started</th>
+                                                                    <th>Total Duration</th>
+                                                                    <th>Result</th>
+                                                                </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr class="scenario-result SUCCESS">
+                                                                        <td>
+                                                                                <a href="ab82137448280ae6c660a277b78273eb47702d8bf14171e7ee890709b669b5ae.html">Flujo de compra en la tienda online Demoblaze</a>
+                                                                        </td>
+                                                                        <td data-order="Compra exitosa de dos productos - &lt;descripcion&gt;">
+                                                                            <i class="bi bi-table"
+                                                                               title="Data Driven Scenario"> <a
+                                                                                        href="42091821abc7d1723262ea12c3d952cd18852389bf17dd26553d00f05666bc30.html">Compra exitosa de dos productos - &lt;descripcion&gt;</a>
+                                                                                <br/>
+                                                                                    <a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a> 3 passing test cases
+                                                                                    <br/>
+                                                                        </td>
+                                                                        <td><span class='context-icon'><i class='bi bi-browser-chrome' title='Chrome'></i> <i class='bi bi-windows' title='Windows'></i></span><span style="display:none">Chrome,windows</span>
+                                                                        </td>
+                                                                        <td>7</td>
+                                                                        <td>Cuando agrega al carrito los productos de la compra "<idCompra>"
+Y visualiza el carrito de compras
+Entonces el carrito muestra los productos agregados con el total correcto
+Cuando completa el formulario de compra con sus datos
+Y finaliza la compra
+Entonces visualiza el mensaje de confirmación "<mensaje>"
+Y el comprobante muestra el monto total, la tarjeta y el nombre del cliente
+</td>
+                                                                        <td data-order="1795020549">11:49:09</td>
+                                                                        <td>27s 739ms</td>
+                                                                        <td><a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a> <span
+                                                                                    style="display:none">SUCCESS</span>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr class="scenario-result SUCCESS">
+                                                                        <td>
+                                                                                <a href="ab82137448280ae6c660a277b78273eb47702d8bf14171e7ee890709b669b5ae.html">Flujo de compra en la tienda online Demoblaze</a>
+                                                                        </td>
+                                                                        <td data-order="No se permite finalizar la compra sin nombre ni tarjeta de crédito">
+                                                                                    <a href="41cefd872be75e3282216c929c7af392273747fc87b02b3b76384e5226900818.html">No se permite finalizar la compra sin nombre ni tarjeta de crédito</a>
+                                                                        </td>
+                                                                        <td><span class='context-icon'><i class='bi bi-browser-chrome' title='Chrome'></i> <i class='bi bi-windows' title='Windows'></i></span><span style="display:none">Chrome,windows</span>
+                                                                        </td>
+                                                                        <td>5</td>
+                                                                        <td>Dado que el cliente abre la tienda Demoblaze
+Cuando agrega al carrito el producto "Nexus 6"
+Y visualiza el carrito de compras
+Y intenta finalizar la compra sin llenar el formulario
+Entonces el sistema muestra la alerta "Please fill out Name and Creditcard."
+</td>
+                                                                        <td data-order="1795020577">11:49:37</td>
+                                                                        <td>5s 304ms</td>
+                                                                        <td><a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a> <span
+                                                                                    style="display:none">SUCCESS</span>
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-sm-12">
+                                                        <h3><i class="bi bi-hand-index-thumb"></i> Manual Tests</h3>
+
+                                                            No manual tests were recorded
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-12">
+                <h3>Tags</h3>
+                    <div class="card">
+                        <div class="card-body">
+                            <div>
+                                    <a href="41f5205d6d58c0b87620866aba63cb6e3d1be42b6c5018f18cc7c680fcccb866.html">
+                                    <span class="tag-badge badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
+                                        <i class="bi bi-tag-fill"></i> E2e&nbsp;&nbsp;&nbsp;3
+                                    </span>
+                                    </a>
+                                    <a href="da86e1808664b147802c709193f2b54ca101641eca94719ba225175b350669d9.html">
+                                    <span class="tag-badge badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
+                                        <i class="bi bi-tag-fill"></i> Negativo&nbsp;&nbsp;&nbsp;1
+                                    </span>
+                                    </a>
+                                    <a href="5e560c8c80d650939c468783095d323d911fd254d2a1c0cf34674a3ee5badc73.html">
+                                    <span class="tag-badge badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
+                                        <i class="bi bi-tag-fill"></i> Compra Exitosa&nbsp;&nbsp;&nbsp;3
+                                    </span>
+                                    </a>
+                                    <a href="f48701cdaec0fe13227ebd4cd925a31f22290514f5e1bc6151b4db7e286151c8.html">
+                                    <span class="tag-badge badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
+                                        <i class="bi bi-tag-fill"></i> Flujo Compra&nbsp;&nbsp;&nbsp;4
+                                    </span>
+                                    </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                                <h5 class="card-title">Context</h5>
+                            <div>
+                                    <a href="59736924e81ea98f655ac8eba7cd96079d8d80131e0c4360daf32a724d0b38a0.html">
+                                    <span class="tag-badge badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
+                                        <i class="bi bi-tag-fill"></i> Chrome, Windows&nbsp;&nbsp;&nbsp;4
+                                    </span>
+                                    </a>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="beforefooter"></div>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-12">
+            <span class="version">Serenity BDD version 4.2.1</span>
+        </div>
+    </div>
+</div>
+
+<!-- Chart data -->
+    <!-- PIE CHART -->
+    <script>
+
+        // The results pie chart
+        const outcomeChartCtx = document.getElementById('resultChart');
+
+        // Options define for display value on top of bars
+        const outcomeDetailsReports = [
+            { title: 'Passing Test Cases', link: "0e7e284545e5faafe0fef5da5b0dae62ff8d2cdce913cf61bc2db78e4eedffb7.html" },
+            { title: 'Pending Test Cases', link: "13aa8dde9b559ee4d071871b440a4be70b4cbed6227a039883aebc8decce19da.html" },
+            { title: 'Ignored Test Cases', link: "5a143bfbb4d577455cf9fc4f61430333af891579d15a808db2966d6844eb442d.html" },
+            { title: 'Skipped Test Cases', link: "174f743446fa847621eceed87a7e3542c9f9f3ec9efbeeb335ad883edfcf2d73.html" },
+            { title: 'Aborted Test Cases',  link: "050d824676de93ea5bed0405d46b2da27121436c51b97896e996112075f9aa8e.html"},
+            { title: 'Failed Test Cases', link: "04d05aebd604ff8a55edcce09ad1a99de9772dda67e8909fc987a58d8fc3c276.html"  },
+            { title: 'Broken Test Cases', link: "637ee76da12f6965a676164cf6edf2338371889ba05fa01f6c7f6f22e380faf4.html"    },
+            { title: 'Compromised Test Cases',  link: "503ac87495acc3b7981e09baee0ef395326bf15c0f51d6e8620b27c93c9e9896.html" },
+        ]
+        const outcomeData = {
+            labels: ['Passing Test Cases', 'Pending Test Cases', 'Ignored Test Cases', 'Skipped Test Cases', 'Aborted Test Cases', 'Failed Test Cases', 'Broken Test Cases', 'Compromised Test Cases','Undefined Test Cases'],
+            datasets: [{
+                label: 'Test Results',
+                fill: false,
+                data: [4,0,0,0,0,0,0,0],
+                backgroundColor: ['rgba(153,204,51,0.5)','rgba(165, 199, 238, 0.5)','rgba(168, 168, 168, 0.5)','rgba(238, 224, 152, 0.75)','rgba(255, 153, 102, 0.5)','rgba(255, 22, 49, 0.5)','rgba(255, 97, 8, 0.5)','rgba(255, 104, 255, 0.5)','rgba(83, 50, 168, 0.5)'],
+                borderColor: ['rgba(153,204,51,1)','rgba(165, 199, 238, 1)','rgba(168, 168, 168, 1)','rgba(238, 224, 152, 1)','rgba(255, 153, 102, 1)','rgba(255, 22, 49, 1)','rgba(255, 97, 8, 1)','rgba(255, 104, 255, 1)','rgba(83, 50, 168, 1)'],
+                borderWidth: 1,
+            }]
+        }
+        const outcomeOptions = {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                },
+                // Change options for ALL labels of THIS CHART
+                datalabels: {
+                    color: '#444444',
+                    'font.weight': 'bold',
+                    formatter: (value, ctx) => {
+                        let sum = 0;
+                        let dataArr = ctx.chart.data.datasets[0].data;
+                        dataArr.map(data => {
+                            sum += data;
+                        });
+                        let percentage = (value * 100 / sum).toFixed(0) + "%";
+                        if (percentage === '0%' || percentage === 'NaN%') {
+                            return '';
+                        } else {
+                            return percentage;
+                        }
+                    },
+                },
+            }
+        }
+
+        const outcomeChart = new Chart(outcomeChartCtx, {
+            type: 'doughnut',
+            data: outcomeData,
+            options: outcomeOptions,
+            plugins: [
+                {
+                    id: 'text',
+                    beforeDraw: function (chart, a, b) {
+                        var width = chart.width,
+                            height = chart.height,
+                            ctx = chart.ctx;
+
+                        ctx.restore();
+                        var fontSize = (height / 200).toFixed(1);
+                        ctx.font = fontSize + "em sans-serif";
+                        ctx.textBaseline = "middle";
+
+                        var text = "100%"
+                        textX = 10 + Math.round((width - ctx.measureText(text).width) / 2);
+                        textY = (height / 2) - 40;
+
+                        ctx.fillText(text, textX, textY);
+                        ctx.save();
+                    }
+                }]
+        });
+
+        function clickHandler(click) {
+            const points = outcomeChart.getElementsAtEventForMode(click, 'nearest', {intersect: true}, true);
+            if (points.length) {
+                const firstPoint = points[0];
+                window.open(outcomeDetailsReports[firstPoint.index].link, "_self")
+
+            }
+        }
+        outcomeChartCtx.onclick = clickHandler;
+    </script>
+    <!-- END PIE CHART -->
+
+    <!-- SUMMARY BAR CHART -->
+    <script>
+
+        // The Severity bar chart
+        const severityChartCtx = document.getElementById('severityChart');
+
+        // Options define for display value on top of bars
+
+        const severityDetailsReports = [
+            { title: 'Passing Scenarios', link: "0e7e284545e5faafe0fef5da5b0dae62ff8d2cdce913cf61bc2db78e4eedffb7.html" },
+            { title: 'Pending Scenarios', link: "13aa8dde9b559ee4d071871b440a4be70b4cbed6227a039883aebc8decce19da.html" },
+            { title: 'Ignored Scenarios', link: "5a143bfbb4d577455cf9fc4f61430333af891579d15a808db2966d6844eb442d.html" },
+            { title: 'Skipped Scenarios', link: "174f743446fa847621eceed87a7e3542c9f9f3ec9efbeeb335ad883edfcf2d73.html" },
+            { title: 'Aborted Scenarios',  link: "050d824676de93ea5bed0405d46b2da27121436c51b97896e996112075f9aa8e.html"},
+            { title: 'Failed Scenarios', link: "04d05aebd604ff8a55edcce09ad1a99de9772dda67e8909fc987a58d8fc3c276.html"  },
+            { title: 'Broken Scenarios', link: "637ee76da12f6965a676164cf6edf2338371889ba05fa01f6c7f6f22e380faf4.html"    },
+            { title: 'Compromised Scenarios',  link: "503ac87495acc3b7981e09baee0ef395326bf15c0f51d6e8620b27c93c9e9896.html" },
+        ]
+        const severityData = {
+            labels: ['Passing', 'Pending', 'Ignored', 'Skipped', 'Aborted', 'Failed', 'Broken', 'Compromised'],
+            datasets: [
+                {
+                    label: 'Automated',
+                    data: [4,0,0,0,0,0,0,0],
+                    backgroundColor: ['rgba(153,204,51,0.5)','rgba(165, 199, 238, 0.5)','rgba(168, 168, 168, 0.5)','rgba(238, 224, 152, 0.75)','rgba(255, 153, 102, 0.5)','rgba(255, 22, 49, 0.5)','rgba(255, 97, 8, 0.5)','rgba(255, 104, 255, 0.5)','rgba(83, 50, 168, 0.5)'],
+                    borderColor: ['rgba(153,204,51,1)','rgba(165, 199, 238, 1)','rgba(168, 168, 168, 1)','rgba(238, 224, 152, 1)','rgba(255, 153, 102, 1)','rgba(255, 22, 49, 1)','rgba(255, 97, 8, 1)','rgba(255, 104, 255, 1)','rgba(83, 50, 168, 1)'],
+                    borderWidth: 1
+                },
+                {
+                    label: 'Manual',
+                    data: [0,0,0,0,0,0,0,0],
+                    backgroundColor: ['rgba(153,204,51,0.25)','rgba(165, 199, 238, 0.25)','rgba(168, 168, 168, 0.25)','rgba(238, 224, 152, 0.375)','rgba(255, 153, 102, 0.25)','rgba(255, 22, 49, 0.25)','rgba(255, 97, 8, 0.25)','rgba(255, 104, 255, 0.25)','rgba(83, 50, 168, 0.25)'],
+                    borderColor: ['rgba(153,204,51,1)','rgba(165, 199, 238, 1)','rgba(168, 168, 168, 1)','rgba(238, 224, 152, 1)','rgba(255, 153, 102, 1)','rgba(255, 22, 49, 1)','rgba(255, 97, 8, 1)','rgba(255, 104, 255, 1)','rgba(83, 50, 168, 1)'],
+                    borderWidth: 1
+                },
+
+            ]
+        }
+        const severityOptions = {
+            responsive: true,
+            skipNull: true,
+            scales: {
+                x: {
+                    stacked: true,
+                },
+                y: {
+                    stacked: true,
+                }
+            },
+            plugins: {
+                // Change options for ALL labels of THIS CHART
+                datalabels: {
+                    color: '#444444',
+                    'font.weight': 'bold',
+                    formatter: (value, ctx) => {
+                        if (value === 0) {
+                            return '';
+                        } else {
+                            return value;
+                        }
+                    },
+                }
+            }
+        }
+        const severityChart = new Chart(severityChartCtx, {
+            type: 'bar',
+            data: severityData,
+            options: severityOptions
+        });
+
+        function clickHandler(click) {
+            const points = severityChart.getElementsAtEventForMode(click, 'nearest', {intersect: true}, true);
+            if (points.length) {
+                const firstPoint = points[0];
+                window.open(severityDetailsReports[firstPoint.index].link, "_self")
+
+            }
+        }
+        severityChartCtx.onclick = clickHandler;
+    </script>
+    <!-- END SUMMARY CHART -->
+
+    <!-- DURATION CHART -->
+    <script>
+
+        // Options define for display value on top of bars
+        const durationDetailsReports = [
+                {title: "Under 1 second", link: "5f5923289dc65f9a7e4f388f1d9e94f0f1474ef3f15732079ee04f08f5f30140.html"},
+                {title: "1 to 10 seconds", link: "0d014ce6eb928cfd90a0bb76cfc601f4c016660ab07dd0941c983f54b8a1ba93.html"},
+                {title: "10 to 30 seconds", link: "756a6073571c2abdc37d32ce9c7f0dba1a60460440f9a51c809c6be729a2d61a.html"},
+                {title: "30 to 60 seconds", link: "000fe0e90727fb3370b826e9bd1100936f91698e6fe3405b4fc41bcd75bb5fac.html"},
+                {title: "1 to 2 minutes", link: "dc40aa4ef0f254a5b1ef983df6c6243f762aae115c464490f13da7e5bd8bc88b.html"},
+                {title: "2 to 5 minutes", link: "390f3acac64946aff473ffb8dd76095484a4d81268141aa8dbecbf2e0d2cd448.html"},
+                {title: "5 to 10 minutes", link: "57b9ba424637d157b7de4ee28708337031c40cbcfe4279c0635f6dbb54dda2e7.html"},
+                {title: "10 minutes or over", link: "43d13a6fb03505ae0cb68ad7c1a09ec9f7d8e6ae316d950c06152f21c6bd5be2.html"},
+        ]
+        // The Severity bar chart
+        const durationChartCtx = document.getElementById('durationChart');
+
+        // Options define for display value on top of bars
+
+        const durationData = {
+            labels: ['Under 1 second','1 to 10 seconds','10 to 30 seconds','30 to 60 seconds','1 to 2 minutes','2 to 5 minutes','5 to 10 minutes','10 minutes or over'],
+            datasets: [{
+                label: 'Number of tests per duration',
+                fill: false,
+                data: ['0','3','1','0','0','0','0','0'],
+                backgroundColor: 'rgba(83, 146, 255,0.5)',
+                borderColor: 'rgba(83, 146, 255, 1)',
+            }]
+        }
+        const durationOptions = {
+            responsive: true,
+            plugins: {
+                // Change options for ALL labels of THIS CHART
+                datalabels: {
+                    color: '#444444',
+                    'font.weight': 'bold',
+                    formatter: (value, ctx) => {
+                        if (value > 0) {
+                            return value;
+                        } else {
+                            return '';
+                        }
+                    },
+                },
+                tooltip: {
+                    enabled: true,
+                    usePointStyle: true,
+                    callbacks: {
+                        label: (data) => {
+                            return data.parsed.y + ' tests'
+                        }
+                    },
+                },
+            },
+        }
+
+        const durationChart = new Chart(durationChartCtx, {
+            type: 'bar',
+            data: durationData,
+            options: durationOptions
+        });
+
+        function durationClickHandler(click) {
+            const points = durationChart.getElementsAtEventForMode(click, 'nearest', {intersect: true}, true);
+            if (points.length) {
+                const firstPoint = points[0];
+                window.open(durationDetailsReports[firstPoint.index].link, "_self")
+
+            }
+        }
+
+        durationChartCtx.onclick = durationClickHandler;
+    </script>
+    <!-- END DURATION CHART -->
+
+
+
+    <!-- COVERAGE BAR CHART -->
+    <script>
+
+        // The coverage bar chart
+        const coverageChartCtx = document.getElementById('coverageChart');
+
+        // Options define for display value on top of bars
+
+        const coverageReports = [
+            {
+                title: 'Flujo de compra en la tienda online Demoblaze',
+                result: 'SUCCESS',
+                link: "ab82137448280ae6c660a277b78273eb47702d8bf14171e7ee890709b669b5ae.html"
+            },
+        ]
+        const coverageData = {
+            labels: [
+                'Flujo de compra en la tienda online Demoblaze',
+            ],
+            datasets: [
+                {
+                    label: ['Passing Tests'],
+                    data: [4],
+                    backgroundColor: [ 'rgba(153,204,51,0.5)' ]
+                },
+                {
+                    label: ['Pending Tests'],
+                    data: [0],
+                    backgroundColor: [ 'rgba(165, 199, 238, 0.5)' ]
+                },
+                {
+                    label: ['Ignored Tests'],
+                    data: [0],
+                    backgroundColor: [ 'rgba(168, 168, 168, 0.5)' ]
+                },
+                {
+                    label: ['Skipped Tests'],
+                    data: [0],
+                    backgroundColor: [ 'rgba(238, 224, 152, 0.75)' ]
+                },
+                {
+                    label: ['Aborted Tests'],
+                    data: [0],
+                    backgroundColor: [ 'rgba(255, 153, 102, 0.5)' ]
+                },
+                {
+                    label: ['Failed Tests'],
+                    data: [0],
+                    backgroundColor: [ 'rgba(255, 22, 49, 0.5)' ]
+                },
+                {
+                    label: ['Errors'],
+                    data: [0],
+                    backgroundColor: [ 'rgba(255, 97, 8, 0.5)' ]
+                },
+                {
+                    label: ['Compromised Tests'],
+                    data: [0],
+                    backgroundColor: [ 'rgba(255, 104, 255, 0.5)' ]
+                },
+            ]
+        }
+        const coverageOptions = {
+            responsive: true,
+            indexAxis: 'y',
+            // barPercentage: ,
+            barThickness: 'flex',
+            maxBarThickness: 30,
+            minBarLength: 2,
+            skipNull: true,
+            scales: {
+                x: {
+                    stacked: true,
+                },
+                y: {
+                    stacked: true,
+                }
+            },
+            plugins: {
+                // Change options for ALL labels of THIS CHART
+                datalabels: {
+                    color: '#444444',
+                    'font.weight': 'bold'
+                },
+                tooltip: {
+                    enabled: true,
+                    usePointStyle: true,
+                },
+            },
+        }
+
+        const coverageChart = new Chart(coverageChartCtx, {
+            type: 'bar',
+            data: coverageData,
+            options: coverageOptions
+        });
+
+        function coverageClickHandler(click) {
+            const points = coverageChart.getElementsAtEventForMode(click, 'nearest', {intersect: true}, true);
+            if (points.length) {
+                const firstPoint = points[0];
+                if (coverageReports[firstPoint.index].link) {
+                    window.open(coverageReports[firstPoint.index].link, "_self")
+                }
+            }
+        }
+
+        coverageChartCtx.onclick = coverageClickHandler;
+    </script>
+    <!-- END COVERAGE CHART -->
+
+</body>
+</html>

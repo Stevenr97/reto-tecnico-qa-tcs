@@ -15,10 +15,11 @@ Adicional: escenario negativo que intenta comprar con el formulario vacío.
 
 2. REQUISITOS (versiones usadas)
 --------------------------------
-  - Java JDK 17 o superior        (java -version)
-  - Apache Maven 3.9.x            (mvn -v)
+  - Java JDK 17 o superior        (probado con Temurin 21.0.13)   -> java -version
+  - Apache Maven 3.9 o superior   (probado con 3.10.1)            -> mvn -v
   - Google Chrome (última versión estable)
   - Conexión a internet (descarga de dependencias y del driver de Chrome)
+  - Probado en Windows 11
   Dependencias principales (las descarga Maven automáticamente):
   - Serenity BDD 4.2.1 (core, screenplay, screenplay-webdriver, cucumber)
   - Cucumber 7.20.1 / JUnit Platform 1.11.3

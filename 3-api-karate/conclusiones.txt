@@ -26,6 +26,16 @@ HALLAZGOS SOBRE LOS SERVICIOS
    un JSON {"errorMessage": ...}. Lo ideal es un contrato JSON uniforme.
 6. Error gramatical en el mensaje: "This user already exist." (debería ser "already exists").
 
+7. DEFECTO - Validación solo en el front-end: la web impide registrarse con campos
+   vacíos ("Please fill out Username and Password."), pero la API no valida:
+   - Signup con password vacío: responde 200 y REGISTRA el usuario sin contraseña.
+   - Signup con username vacío (o ambos vacíos): responde 500 Internal Server Error,
+     es decir, el servidor no controla el caso. Además, la página de error expone que
+     el backend usa Flask (divulgación de tecnología).
+   Esperado: rechazar la petición con un error controlado (p. ej. 400 + errorMessage).
+   Reproducción: mvn clean test "-Dkarate.options=--tags @defecto"
+   (estos escenarios están excluidos de la ejecución normal por ser defectos conocidos).
+
 CONSIDERACIONES TÉCNICAS
 - Variables y funciones comunes centralizadas en karate-config.js (baseUrl, generación
   de usuarios únicos y codificación Base64) para no repetir lógica en los features.

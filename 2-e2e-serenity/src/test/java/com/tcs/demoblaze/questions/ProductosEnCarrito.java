@@ -1,7 +1,7 @@
 package com.tcs.demoblaze.questions;
 
 import com.tcs.demoblaze.userinterfaces.CarritoPage;
-import net.serenitybdd.annotations.Subject;
+import net.serenitybdd.screenplay.annotations.Subject;
 import net.serenitybdd.core.pages.WebElementFacade;
 import net.serenitybdd.screenplay.Actor;
 import net.serenitybdd.screenplay.Question;

@@ -18,6 +18,27 @@
         <junit.platform.version>1.11.3</junit.platform.version>
     </properties>
 
+    <!-- Alinea las versiones de JUnit 5 y Cucumber que llegan por distintas librerías.
+         Si quedan versiones mezcladas, el motor de Cucumber no puede descubrir las pruebas. -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit.jupiter.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.cucumber</groupId>
+                <artifactId>cucumber-bom</artifactId>
+                <version>${cucumber.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>net.serenity-bdd</groupId>
@@ -66,6 +87,14 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Serenity usa internamente algunas clases de JUnit 4 (p. ej. en los Scenario Outline) -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
             <scope>test</scope>
         </dependency>
 
@@ -121,6 +150,14 @@
                 <configuration>
                     <reports>single-page-html</reports>
                 </configuration>
+                <dependencies>
+                    <!-- Reporte resumen de una página (serenity-summary.html) -->
+                    <dependency>
+                        <groupId>net.serenity-bdd</groupId>
+                        <artifactId>serenity-single-page-report</artifactId>
+                        <version>${serenity.version}</version>
+                    </dependency>
+                </dependencies>
                 <executions>
                     <execution>
                         <id>serenity-reports</id>
