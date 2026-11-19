@@ -1,48 +1,45 @@
 =====================================================================
- CONCLUSIONES Y HALLAZGOS - EJERCICIO E2E (DEMOBLAZE)
+ CONCLUSIONES - EJERCICIO E2E (FLUJO DE COMPRA EN DEMOBLAZE)
 =====================================================================
 
-RESULTADO GENERAL
-- Se automatizó el flujo completo de compra (agregar 2 productos, ver carrito, llenar
-  formulario y finalizar compra) con Serenity BDD bajo el patrón Screenplay, con 3
-  combinaciones de datos (Scenario Outline + CSV) y un escenario negativo.
-- Además de "que la compra termine", se valida que el carrito muestre exactamente los
-  productos agregados, que el total sea la suma de los precios capturados en cada producto
-  y que el comprobante muestre el monto, la tarjeta y el nombre ingresados.
+QUÉ HICE
+Antes de automatizar, hice la compra a mano varias veces para entender el flujo y
+decidir qué validar. Luego lo automaticé con Serenity BDD usando el patrón Screenplay.
+La prueba no solo hace los clics: también verifica que el carrito tenga los productos
+que agregué, que el total sea la suma de sus precios y que el comprobante final muestre
+el monto, la tarjeta y el nombre que ingresé. Lo ejecuté con 3 compras distintas, cuyos
+datos están en un archivo CSV, y agregué un caso negativo (comprar con el formulario
+vacío). Los 4 escenarios pasaron.
 
-HALLAZGOS SOBRE LA APLICACIÓN
-1. El formulario de compra solo valida que "Name" y "Credit card" no estén vacíos
-   (alerta "Please fill out Name and Creditcard."). No valida el formato ni la longitud
-   de la tarjeta, ni que el mes/año sean válidos o futuros: se puede comprar con datos
-   evidentemente inválidos. En una tienda real esto sería un defecto de severidad alta.
-2. Los mensajes "Product added." y la validación del formulario se muestran con alertas
-   nativas del navegador (window.alert), una práctica de UX pobre y que complica la
-   automatización (bloquean la página y las capturas de pantalla).
-3. El carrito y el catálogo se cargan de forma asíncrona (una petición por producto);
-   el total aparece al final. Sin esperas explícitas las validaciones son inestables.
-4. Se reutiliza el mismo id HTML (tbodyid) en el catálogo, el detalle del producto y el
-   carrito; los ids deberían ser únicos por página.
-5. DEFECTO - Fecha incorrecta en el comprobante: en una compra realizada el 18/11/2026,
-   el comprobante muestra "Date: 18/10/2026", es decir, el MES aparece con un mes de
-   atraso (el día y el año son correctos). La causa probable es el uso de getMonth() de
-   JavaScript, que numera los meses desde 0 (enero = 0), sin sumarle 1.
-   Impacto: el cliente recibe un comprobante con una fecha errónea (severidad media).
-   Evidencia: captura del último paso de cada compra en el reporte de Serenity.
-6. El carrito de un usuario anónimo se asocia a una cookie; cada escenario abre un
-   navegador nuevo en modo incógnito para que los datos de un escenario no afecten a otro.
+HALLAZGOS
+1. Fecha incorrecta en el comprobante (defecto): hice la compra el 18/11/2026 y el
+   comprobante dice "18/10/2026", es decir, el mes sale con un mes de atraso. Lo noté
+   revisando las capturas del reporte. Es un buen ejemplo de que una prueba en verde no
+   garantiza que no haya errores: solo comprueba lo que se le pidió validar. Como mejora,
+   agregaría una validación de la fecha.
+2. El formulario de compra solo exige el nombre y la tarjeta. No revisa que la tarjeta
+   tenga un formato válido ni que el mes y el año tengan sentido, así que se puede comprar
+   con datos inventados. En una tienda real esto sería un problema serio.
+3. La página usa ventanas de alerta del navegador ("Product added.", "Please fill out
+   Name and Creditcard."). Además de ser incómodas para el usuario, bloquean la página
+   mientras están abiertas, y tuve que manejarlas con cuidado en la automatización.
+4. El carrito tarda un poco en cargar: los productos y el total aparecen después de
+   unos segundos. Si la prueba valida demasiado rápido, falla aunque la página funcione.
 
-CONSIDERACIONES TÉCNICAS
-- Patrón Screenplay: separa el "qué" (tasks, questions) del "dónde" (userinterfaces),
-  lo que hace las pruebas legibles para negocio y fáciles de mantener si cambia la UI.
-- Las alertas se manejan en una sola interacción (clic + aceptar) para que Serenity no
-  intente tomar una captura con la alerta abierta.
-- No se usan Thread.sleep: todas las esperas son explícitas (WaitUntil / WebDriverWait).
-- Los precios no están "quemados" en el código: se leen de la página del producto, así la
-  prueba sigue siendo válida si cambian los precios.
-- Demoblaze es un sitio público compartido; ocasionalmente responde lento. Si una
-  ejecución falla por timeout, volver a ejecutar antes de reportar un defecto.
+CONSIDERACIONES Y DECISIONES
+- Usé Screenplay porque separa lo que hace el usuario (tareas como "agregar producto")
+  de dónde están los botones en la página. Si un botón cambia, se corrige en un solo
+  lugar y todas las pruebas siguen funcionando.
+- En lugar de pausas fijas ("esperar 5 segundos"), la prueba espera solo lo necesario
+  hasta que el elemento aparece. Así es más rápida y más estable.
+- No escribí los precios en el código: la prueba los lee de la página de cada producto.
+  Si un precio cambia, la prueba sigue siendo correcta.
+- Cada escenario abre un navegador nuevo en modo incógnito, para que el carrito de una
+  compra no se mezcle con el de la siguiente.
+- Demoblaze es una página pública y a veces responde lento. Si una prueba falla por
+  tiempo, conviene repetirla antes de reportar un error.
 
-MEJORAS PROPUESTAS
-- Ejecutar en paralelo y en varios navegadores (Chrome/Firefox/Edge) desde un pipeline CI.
-- Agregar escenarios para eliminar productos del carrito y para compra con usuario logueado.
-- Integrar los reportes de Serenity como artefacto del pipeline (GitHub Actions / Jenkins).
+QUÉ MEJORARÍA
+- Validar también la fecha del comprobante.
+- Agregar casos como eliminar un producto del carrito o comprar con un usuario logueado.
+- Ejecutar las pruebas automáticamente en un pipeline y en varios navegadores.

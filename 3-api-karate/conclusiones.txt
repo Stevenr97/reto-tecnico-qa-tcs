@@ -1,50 +1,47 @@
 =====================================================================
- CONCLUSIONES Y HALLAZGOS - EJERCICIO DE APIS (DEMOBLAZE)
+ CONCLUSIONES - EJERCICIO DE APIS (SIGNUP Y LOGIN DE DEMOBLAZE)
 =====================================================================
 
-RESULTADO GENERAL
-- Se automatizaron los 4 casos solicitados (crear usuario, usuario existente, login
-  correcto, login incorrecto) más variantes de datos mediante Scenario Outline con
-  archivos JSON y CSV.
-- Las pruebas son independientes y repetibles: cada ejecución genera usernames únicos
-  y el login usa un usuario creado por la propia prueba (no depende de datos previos).
+QUÉ HICE
+Primero probé el registro y el login a mano en la página y revisé con las herramientas
+del navegador (F12) qué datos se envían al servidor y qué responde. Así descubrí, por
+ejemplo, que la página envía la contraseña codificada en Base64. Con esa información
+automaticé los 4 casos pedidos con Karate: crear un usuario nuevo, intentar crear uno
+que ya existe, login correcto y login incorrecto. Los datos de prueba están en archivos
+JSON y CSV, y los 7 escenarios pasaron.
 
-HALLAZGOS SOBRE LOS SERVICIOS
-1. Códigos HTTP no semánticos: todas las respuestas devuelven 200, incluso los errores.
-   Lo esperado en una API REST sería, por ejemplo: 201 al crear el usuario, 409 cuando ya
-   existe y 401 con credenciales incorrectas. Esto obliga a validar el cuerpo de la
-   respuesta para saber si la operación falló.
-2. Riesgo de seguridad (enumeración de usuarios): el login responde mensajes distintos
-   para "Wrong password." y "User does not exist.", lo que permite a un atacante saber
-   qué usuarios existen. Se recomienda un mensaje genérico ("Usuario o contraseña
-   incorrectos").
-3. El password viaja codificado en Base64, que NO es cifrado: se decodifica trivialmente.
-   La protección real depende únicamente de HTTPS.
-4. No existe una política de contraseñas: se aceptan passwords débiles como "123456".
-5. Formatos de respuesta inconsistentes: el registro exitoso devuelve un cuerpo vacío,
-   el login exitoso devuelve un texto plano "Auth_token: <token>" y los errores devuelven
-   un JSON {"errorMessage": ...}. Lo ideal es un contrato JSON uniforme.
-6. Error gramatical en el mensaje: "This user already exist." (debería ser "already exists").
+Cada ejecución crea usuarios con un nombre único (prefijo + hora), porque al probar a mano
+me di cuenta de que casi cualquier nombre común ya está registrado en Demoblaze.
 
-7. DEFECTO - Validación solo en el front-end: la web impide registrarse con campos
-   vacíos ("Please fill out Username and Password."), pero la API no valida:
-   - Signup con password vacío: responde 200 y REGISTRA el usuario sin contraseña.
-   - Signup con username vacío (o ambos vacíos): responde 500 Internal Server Error,
-     es decir, el servidor no controla el caso. Además, la página de error expone que
-     el backend usa Flask (divulgación de tecnología).
-   Esperado: rechazar la petición con un error controlado (p. ej. 400 + errorMessage).
-   Reproducción: mvn clean test "-Dkarate.options=--tags @defecto"
-   (estos escenarios están excluidos de la ejecución normal por ser defectos conocidos).
+HALLAZGOS
+1. La API acepta registros con campos vacíos (defecto): la página no deja registrarse
+   con los campos vacíos, pero revisando con F12 vi que esa validación la hace solo la
+   página. Al probar directamente contra la API encontré que:
+   - con la contraseña vacía, el servidor registra el usuario igual, sin contraseña;
+   - con el usuario vacío, el servidor se cae y responde un error 500.
+   Esto es importante porque cualquiera que use la API directamente puede saltarse la
+   validación de la página. Dejé estos casos marcados como @defecto para poder
+   reproducirlos (ver readme.txt) y guardé la evidencia en la carpeta reportes.
+2. El login da mensajes distintos según el error: "Wrong password." si el usuario
+   existe y "User does not exist." si no existe. Con eso cualquiera puede averiguar
+   qué usuarios están registrados. Lo recomendable es un mensaje único como
+   "Usuario o contraseña incorrectos".
+3. Todas las respuestas devuelven el código 200 (éxito), incluso cuando hay un error.
+   Para saber si algo falló hay que leer el mensaje de la respuesta, lo que hace más
+   difícil detectar errores.
+4. No hay reglas para las contraseñas: se puede registrar un usuario con "123456".
+5. La contraseña viaja codificada en Base64, pero eso no es cifrado: se puede decodificar
+   fácilmente. La seguridad depende solo de que la conexión sea HTTPS.
+6. Hay un error de redacción en el mensaje "This user already exist." (debería decir
+   "already exists").
 
-CONSIDERACIONES TÉCNICAS
-- Variables y funciones comunes centralizadas en karate-config.js (baseUrl, generación
-  de usuarios únicos y codificación Base64) para no repetir lógica en los features.
-- Helper reutilizable (common/crear-usuario.feature) invocado con call / callonce para
-  preparar precondiciones sin duplicar pasos.
-- Se ejecuta con 1 hilo porque Demoblaze es un ambiente público compartido; el runner
-  admite paralelismo cambiando .parallel(n).
+CONSIDERACIONES Y DECISIONES
+- Puse la URL y las funciones comunes en karate-config.js para no repetirlas en cada
+  archivo; si la URL cambia, se edita en un solo lugar.
+- Creé un archivo de apoyo (crear-usuario.feature) que crea un usuario y que reutilizo en
+  varias pruebas. Así las pruebas de login no dependen de usuarios que existan de antes.
+- Ejecuto las pruebas de una en una porque Demoblaze es un ambiente público compartido.
 
-MEJORAS PROPUESTAS
-- Agregar validación de esquema (contrato) de las respuestas y de tiempos de respuesta.
-- Casos de borde: campos vacíos, nulos, caracteres especiales en username, longitud máxima.
-- Ejecutar las pruebas en un pipeline CI y publicar el karate-report como artefacto.
+QUÉ MEJORARÍA
+- Validar también la estructura de las respuestas y los tiempos de respuesta.
+- Probar más casos límite: caracteres especiales en el usuario, textos muy largos, etc.

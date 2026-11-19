@@ -1,61 +1,44 @@
 =====================================================================
- CONCLUSIONES - PERFORMANCE QA (EJERCICIO 1: CARGA DEL LOGIN CON k6)
+ CONCLUSIONES - PERFORMANCE (PRUEBA DE CARGA DEL LOGIN CON k6)
 =====================================================================
 
-RESULTADOS DE LA EJECUCIÓN (18/11/2026 - k6 v2.4.0 - 2 minutos a 20 TPS)
-------------------------------------------------------------------------
-| Criterio / métrica              | Objetivo        | Resultado            | Estado    |
-|---------------------------------|-----------------|----------------------|-----------|
-| Throughput (http_reqs)          | >= 20 TPS       | 19,95 req/s (2.401)  | CUMPLE    |
-| Tasa de error (http_req_failed) | < 3 %           | 0,00 % (0 de 2.401)  | CUMPLE    |
-| Tiempo de respuesta p(95)       | <= 1,5 s        | 439 ms               | CUMPLE    |
-| Tiempo de respuesta p(99)       | <= 1,5 s        | 571 ms               | CUMPLE    |
-| Tiempo de respuesta promedio    | -               | 379 ms (mediana 366) | -         |
-| Tiempo de respuesta máximo      | <= 1,5 s        | 1,80 s (1 petición)  | OBSERVAR  |
-| Checks OK                       | > 97 %          | 99,98 % (7.202 / 1)  | CUMPLE    |
-Resultado de los thresholds de k6: TODOS APROBADOS.
+QUÉ HICE
+Hice una prueba de carga al servicio de login con k6, enviando 20 peticiones por segundo
+durante 2 minutos (2.401 peticiones en total). Los usuarios y contraseñas se leen del
+archivo data/users.csv y se van rotando. En el script configuré los criterios del
+ejercicio, de modo que la prueba falla sola si no se cumplen.
+
+RESULTADOS (18/11/2026 - k6 v2.4.0)
+| Criterio                       | Objetivo   | Resultado           | Estado   |
+|--------------------------------|------------|---------------------|----------|
+| Peticiones por segundo         | >= 20      | 19,95 (2.401 total) | CUMPLE   |
+| Tasa de error                  | < 3 %      | 0 % (0 errores)     | CUMPLE   |
+| Tiempo de respuesta (95 %)     | <= 1,5 s   | 0,44 s              | CUMPLE   |
+| Tiempo de respuesta (99 %)     | <= 1,5 s   | 0,57 s              | CUMPLE   |
+| Tiempo de respuesta promedio   | -          | 0,38 s              | -        |
+| Tiempo de respuesta máximo     | <= 1,5 s   | 1,80 s (1 petición) | OBSERVAR |
 
 CONCLUSIONES
-- El servicio de login soporta 20 TPS sostenidos durante 2 minutos sin errores
-  (0 de 2.401 peticiones fallidas) y con tiempos de respuesta muy por debajo del
-  límite: el 99 % de las peticiones respondió en menos de 571 ms.
-- Una sola petición (1 de 2.401 = 0,04 %) tardó 1,80 s y superó el límite de 1,5 s.
-  Si el criterio "máximo 1,5 s" se interpreta de forma estricta para cada petición,
-  hay 1 incumplimiento aislado; por eso se evalúan percentiles (p95/p99), que son la
-  práctica estándar porque un valor aislado puede deberse a la red o a un pico puntual.
-  Se recomienda repetir la prueba para ver si el valor atípico se repite.
-- Casi todo el tiempo de respuesta es espera del servidor (http_req_waiting ≈ 378 ms
-  de 379 ms); la conexión, el TLS, el envío y la recepción son despreciables, por lo que
-  el tiempo está dominado por el procesamiento del servidor y la latencia de red hasta él.
-- Bastaron entre 7 y 19 usuarios virtuales concurrentes para generar 20 TPS (con ~0,38 s
-  por petición, 20 TPS × 0,38 s ≈ 8 usuarios en promedio, según la Ley de Little), lo que
-  indica que la carga solicitada es baja para este servicio.
+- El servicio de login soporta bien 20 peticiones por segundo: no hubo ningún error y
+  la gran mayoría de respuestas llegó en menos de medio segundo.
+- Solo 1 de las 2.401 peticiones tardó más de 1,5 s (1,8 s). Por eso evalúo el tiempo
+  con percentiles: el 95 % y el 99 % de las peticiones respondieron muy por debajo del
+  límite. Un caso aislado puede deberse a un pico de la red. De todas formas, si el
+  criterio se aplica a cada petición, ese caso queda registrado, y recomiendo repetir la
+  prueba para ver si vuelve a pasar.
+- Casi todo el tiempo de cada petición es la espera de la respuesta del servidor; la
+  conexión y el envío de datos son casi instantáneos.
 
-DISEÑO DE LA PRUEBA
-- Se usó el ejecutor constant-arrival-rate (modelo abierto): k6 lanza exactamente 20
-  peticiones por segundo independientemente del tiempo de respuesta. Así se garantiza el
-  objetivo de 20 TPS; con un número fijo de VUs (modelo cerrado) el TPS bajaría si el
-  servicio se vuelve lento y no se mediría la carga pedida.
-- Los 5 usuarios del CSV se recorren de forma circular y se cargan una sola vez en memoria
-  (SharedArray), por lo que el consumo de recursos del generador es mínimo.
-- Los criterios de aceptación están codificados como thresholds: si no se cumplen, k6
-  termina con código de salida distinto de 0 (útil en un pipeline CI/CD).
-- Se mide el tiempo de respuesta en percentiles (p95/p99) y además se valida cada
-  petición individualmente con un check de <= 1,5 s, para ver cuántas lo superan.
+CONSIDERACIONES Y DECISIONES
+- Configuré la prueba para enviar exactamente 20 peticiones por segundo, sin importar
+  cuánto tarde el servidor. Así me aseguro de cumplir los 20 TPS pedidos.
+- fakestoreapi.com es un servicio público de prueba, así que los resultados pueden variar
+  según la red y la carga de otros usuarios. Para medir la capacidad real de un sistema
+  habría que probar en un ambiente propio y controlado.
+- Todos los usuarios del CSV son válidos; sería bueno agregar algunos inválidos para
+  probar también los intentos fallidos de login.
 
-HALLAZGOS / CONSIDERACIONES
-- fakestoreapi.com es un servicio público de demostración, detrás de CDN; los resultados
-  dependen de la red del equipo que ejecuta y de la carga de otros usuarios, por lo que
-  pueden variar entre corridas. Para conclusiones de capacidad se debería probar en un
-  ambiente controlado.
-- Un servicio público puede aplicar limitación de tráfico (HTTP 429). Si aparecen 429,
-  se registran como error y deben analizarse aparte de los errores del servidor (5xx).
-- Todas las credenciales del CSV son válidas; se recomienda agregar un porcentaje de
-  credenciales inválidas para medir también el camino de error del login.
-
-RECOMENDACIONES
-- Ejecutar escalones de carga (20 -> 40 -> 60 TPS) para identificar el punto de quiebre.
-- Ejecutar una prueba de resistencia (soak) de mayor duración para detectar degradación
-  en el tiempo.
-- Correlacionar con métricas del servidor (CPU, memoria, conexiones) cuando se pruebe en
-  un ambiente propio.
+QUÉ MEJORARÍA
+- Subir la carga por etapas (20, 40, 60 peticiones por segundo) para encontrar el punto
+  donde el servicio empieza a fallar.
+- Hacer una prueba más larga para ver si el servicio se degrada con el tiempo.
